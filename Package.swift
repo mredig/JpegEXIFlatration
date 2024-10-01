@@ -36,7 +36,9 @@ let package = Package(
 			]),
         .testTarget(
             name: "JpegEXIFlatrationTests",
-            dependencies: ["JpegEXIFlatration"]
-        ),
+            dependencies: ["JpegEXIFlatration"],
+			resources: [
+				.process("Resources")
+			]),
     ]
 )
