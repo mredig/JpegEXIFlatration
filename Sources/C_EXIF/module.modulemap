@@ -1,0 +1,4 @@
+module exif {
+	umbrella header "c_exif.h"
+	link "exif"
+}

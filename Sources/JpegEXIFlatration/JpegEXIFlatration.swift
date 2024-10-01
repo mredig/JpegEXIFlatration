@@ -1,0 +1,5 @@
+import exif
+
+struct Exif {
+	
+}

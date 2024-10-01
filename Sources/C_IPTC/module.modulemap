@@ -1,0 +1,4 @@
+module iptc {
+	umbrella header "c_iptc.h"
+	link "iptcdata"
+}
