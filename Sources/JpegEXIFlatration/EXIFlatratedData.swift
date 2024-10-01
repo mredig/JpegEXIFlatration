@@ -84,14 +84,14 @@ private func exifForeachIterator(
 		let buffer = UnsafeMutableRawBufferPointer.allocate(byteCount: 1024, alignment: 4)
 		defer { buffer.deallocate() }
 		guard
-			let entry = content.entries.advanced(by: i).pointee
+			let entryPointer = content.entries.advanced(by: i).pointee
 		else { continue }
-		exif_entry_get_value(entry, buffer.baseAddress, UInt32(buffer.count))
+		exif_entry_get_value(entryPointer, buffer.baseAddress, UInt32(buffer.count))
 
 		let valueBuffer = buffer.bindMemory(to: CChar.self)
 		guard
 			let valueBufferCStr = valueBuffer.baseAddress,
-			let nameCStr = exif_tag_get_name_in_ifd(entry.pointee.tag, ifd)
+			let nameCStr = exif_tag_get_name_in_ifd(entryPointer.pointee.tag, ifd)
 		else { continue }
 
 		let name = String(cString: nameCStr)

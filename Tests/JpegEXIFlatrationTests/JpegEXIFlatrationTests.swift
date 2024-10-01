@@ -6,7 +6,7 @@ import exif
 
 
 @Test
-func testFileInit() async throws {
+func testCanon40DFileInit() async throws {
 	let imageURL = Bundle.module.url(forResource: "Canon_40D", withExtension: "jpg")!
 
 	let data = try EXIFlatratedData(fileURL: imageURL)
@@ -15,7 +15,7 @@ func testFileInit() async throws {
 }
 
 @Test
-func testDataInit() async throws {
+func testCanond40DDataInit() async throws {
 	let imageURL = Bundle.module.url(forResource: "Canon_40D", withExtension: "jpg")!
 	let imageData = try Data(contentsOf: imageURL)
 
