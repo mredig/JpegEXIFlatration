@@ -8,12 +8,12 @@ extension ExifIfd: @retroactive CustomStringConvertible {
 	public static let interoperability = Self(4)
 
 	public var description: String {
-		switch self.rawValue {
-		case 0: "IFD 0"
-		case 1: "IFD 1"
-		case 2: "EXIF"
-		case 3: "GPS"
-		case 4: "Interoperability"
+		switch self {
+		case .ifd0: "IFD 0"
+		case .ifd1: "IFD 1"
+		case .exif: "EXIF"
+		case .gps: "GPS"
+		case .interoperability: "Interoperability"
 		default: "ExifIDF.Unknown"
 		}
 	}
