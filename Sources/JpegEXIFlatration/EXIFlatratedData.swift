@@ -2,7 +2,7 @@ import exif
 import Foundation
 
 public class EXIFlatratedData: CustomStringConvertible {
-	public package(set) var storage: [ExifIfd: [ExifTag: ExifRawData]] = [:]
+	public package(set) var storage: Storage = [:]
 
 	package private(set) var endianness: ExifByteOrder
 
@@ -95,6 +95,19 @@ public class EXIFlatratedData: CustomStringConvertible {
 		case failedOpeningFile
 		case failedDecodingData
 	}
+}
+
+extension EXIFlatratedData: Collection {
+	public func index(after i: Storage.Index) -> Storage.Index { storage.index(after: i) }
+
+	public subscript(position: Storage.Index) -> Storage.Element { storage[position] }
+
+	public typealias Storage = [ExifIfd: [ExifTag: ExifRawData]]
+	public typealias Index = Storage.Index
+	public typealias Element = Storage.Element
+
+	public var startIndex: Storage.Index { storage.startIndex }
+	public var endIndex: Storage.Index { storage.endIndex }
 }
 
 private func exifForeachIterator(
