@@ -24,18 +24,10 @@ let package = Package(
 				.apt(["libexif-dev"]),
 				.brew(["libexif"])
 			]),
-		.systemLibrary(
-			name: "C_IPTC",
-			pkgConfig: "libiptcdata",
-			providers: [
-				.apt(["libiptcdata0-dev"]),
-				.brew(["libiptcdata"])
-			]),
         .target(
 			name: "JpegEXIFlatration",
 			dependencies: [
 				"C_EXIF",
-				"C_IPTC"
 			]),
         .testTarget(
             name: "JpegEXIFlatrationTests",
