@@ -29,11 +29,11 @@ func verifyCanon40d(_ data: EXIFlatratedData) throws {
 	#expect(Set(data.dictionary.keys) == expectedIFDs)
 
 	// sample parts
-	#expect(data.dictionary[.ifd0]?["Orientation"] == "Top-left")
-	#expect(data.dictionary[.ifd1]?["Compression"] == "JPEG compression")
-	#expect(data.dictionary[.exif]?["ExposureTime"] == "1/160 sec.")
-	#expect(data.dictionary[.gps]?["GPSVersionID"] == "2.2.0.0")
-	#expect(data.dictionary[.interoperability]?["InteroperabilityIndex"] == "R98")
+	#expect(data.dictionary[.ifd0]?[.orientation]?.libexifString == "Top-left")
+	#expect(data.dictionary[.ifd1]?[.compression]?.libexifString == "JPEG compression")
+	#expect(data.dictionary[.exif]?[.exposureTime]?.libexifString == "1/160 sec.")
+	#expect(data.dictionary[.gps]?[.gpsVersionId]?.libexifString == "2.2.0.0")
+	#expect(data.dictionary[.interoperability]?[.interoperabilityIndex]?.libexifString == "R98")
 }
 
 enum TestError: Error {

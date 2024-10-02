@@ -2,7 +2,9 @@ import exif
 import Foundation
 
 public class EXIFlatratedData: CustomStringConvertible {
-	public package(set) var dictionary: [ExifIfd: [String: String]] = [:]
+	public package(set) var dictionary: [ExifIfd: [ExifTag: ExifRawData]] = [:]
+
+	package private(set) var endianness: ExifByteOrder
 
 	public var description: String {
 		let sorted = dictionary.sorted(by: { $0.key.rawValue < $1.key.rawValue })
@@ -12,7 +14,7 @@ public class EXIFlatratedData: CustomStringConvertible {
 			let idf = idfGroup.key
 			let sortedGroup = idfGroup
 				.value
-				.sorted(by: { $0.key < $1.key })
+				.sorted(by: { $0.key.description < $1.key.description })
 				.map { "\t\($0.key): \($0.value)" }
 			groups.append("\(idf):\n\(sortedGroup.joined(separator: "\n"))")
 		}
@@ -27,16 +29,22 @@ public class EXIFlatratedData: CustomStringConvertible {
 		else { throw .failedOpeningFile }
 		defer { exif_data_unref(exifDataPointer) }
 
+		self.endianness = exif_data_get_byte_order(exifDataPointer)
+
 		exif_data_foreach_content(exifDataPointer, exifForeachIterator, pointer)
 	}
 
 	public init(imageData: Data) throws(Error) {
+		self.endianness = .little
+
 		var data = imageData
 		func block(buffer: UnsafeMutableRawBufferPointer) throws(EXIFlatratedData.Error) -> Void {
 			guard
 				let exifDataPointer = exif_data_new_from_data(buffer.baseAddress, UInt32(buffer.count))
 			else { throw .failedDecodingData }
 			defer { exif_data_unref(exifDataPointer) }
+
+			self.endianness = exif_data_get_byte_order(exifDataPointer)
 
 			exif_data_foreach_content(exifDataPointer, exifForeachIterator, pointer)
 		}
@@ -81,21 +89,12 @@ private func exifForeachIterator(
 
 	let content = contentPointer.pointee
 	for i in 0..<Int(content.count) {
-		let buffer = UnsafeMutableRawBufferPointer.allocate(byteCount: 1024, alignment: 4)
-		defer { buffer.deallocate() }
+
 		guard
 			let entryPointer = content.entries.advanced(by: i).pointee
 		else { continue }
-		exif_entry_get_value(entryPointer, buffer.baseAddress, UInt32(buffer.count))
 
-		let valueBuffer = buffer.bindMemory(to: CChar.self)
-		guard
-			let valueBufferCStr = valueBuffer.baseAddress,
-			let nameCStr = exif_tag_get_name_in_ifd(entryPointer.pointee.tag, ifd)
-		else { continue }
-
-		let name = String(cString: nameCStr)
-		let value = String(cString: valueBufferCStr)
-		userData.dictionary[ifd, default: [:]][name] = value
+		let exifRawData = ExifRawData(from: entryPointer.pointee, ifd: ifd, endianness: userData.endianness)
+		userData.dictionary[ifd, default: [:]][exifRawData.tag] = exifRawData
 	}
 }
