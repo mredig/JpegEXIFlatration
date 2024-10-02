@@ -2,12 +2,12 @@ import exif
 import Foundation
 
 public class EXIFlatratedData: CustomStringConvertible {
-	public package(set) var dictionary: [ExifIfd: [ExifTag: ExifRawData]] = [:]
+	public package(set) var storage: [ExifIfd: [ExifTag: ExifRawData]] = [:]
 
 	package private(set) var endianness: ExifByteOrder
 
 	public var description: String {
-		let sorted = dictionary.sorted(by: { $0.key.rawValue < $1.key.rawValue })
+		let sorted = storage.sorted(by: { $0.key.rawValue < $1.key.rawValue })
 
 		var groups: [String] = []
 		for idfGroup in sorted {
@@ -19,6 +19,27 @@ public class EXIFlatratedData: CustomStringConvertible {
 			groups.append("\(idf):\n\(sortedGroup.joined(separator: "\n"))")
 		}
 		return groups.joined(separator: "\n")
+	}
+
+	public subscript(ifd: ExifIfd) -> [ExifTag: ExifRawData] {
+		storage[ifd] ?? [:]
+	}
+
+	public subscript(tuple: (ifd: ExifIfd, tag: ExifTag)) -> ExifRawData? {
+		self[Path(folder: tuple.ifd, tag: tuple.tag)]
+	}
+
+	public struct Path {
+		let folder: ExifIfd
+		let tag: ExifTag
+	}
+
+	public subscript(path: Path) -> ExifRawData? {
+		guard
+			let directory = storage[path.folder]
+		else { return nil }
+
+		return directory[path.tag]
 	}
 
 	public init(fileURL: URL) throws(Error) {
@@ -95,6 +116,6 @@ private func exifForeachIterator(
 		else { continue }
 
 		let exifRawData = ExifRawData(from: entryPointer.pointee, ifd: ifd, endianness: userData.endianness)
-		userData.dictionary[ifd, default: [:]][exifRawData.tag] = exifRawData
+		userData.storage[ifd, default: [:]][exifRawData.tag] = exifRawData
 	}
 }

@@ -1,5 +1,0 @@
-import exif
-
-struct Exif {
-	
-}
