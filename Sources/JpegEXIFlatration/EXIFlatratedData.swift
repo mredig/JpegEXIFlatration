@@ -52,7 +52,9 @@ public class EXIFlatratedData: CustomStringConvertible {
 
 		self.endianness = exif_data_get_byte_order(exifDataPointer)
 
-		exif_data_foreach_content(exifDataPointer, exifForeachIterator, pointer)
+		withRawPointer { pp in
+			exif_data_foreach_content(exifDataPointer, exifForeachIterator, pp)
+		}
 	}
 
 	public init(imageData: Data) throws(Error) {
@@ -67,7 +69,9 @@ public class EXIFlatratedData: CustomStringConvertible {
 
 			self.endianness = exif_data_get_byte_order(exifDataPointer)
 
-			exif_data_foreach_content(exifDataPointer, exifForeachIterator, pointer)
+			withRawPointer { pp in
+				exif_data_foreach_content(exifDataPointer, exifForeachIterator, pp)
+			}
 		}
 		do {
 			try data.withUnsafeMutableBytes(block)
@@ -83,12 +87,11 @@ public class EXIFlatratedData: CustomStringConvertible {
 		return typed.pointee
 	}
 
-	package var pointer: UnsafeMutableRawPointer {
-		let typedPointer = UnsafeMutablePointer<EXIFlatratedData>.allocate(capacity: 1)
-		typedPointer.pointee = self
-		let rawPointer = UnsafeMutableRawPointer(typedPointer)
-
-		return rawPointer
+	package func withRawPointer(_ block: (UnsafeMutablePointer<EXIFlatratedData>) throws -> Void) rethrows {
+		var this = self
+		try withUnsafeMutablePointer(to: &this) { pointer in
+			try block(pointer)
+		}
 	}
 
 	public enum Error: Swift.Error {
